@@ -1,0 +1,24 @@
+# Compiled APK downloads (downloaded dynamically via install_top_apps.ps1)
+top_apps/*.apk
+!top_apps/.gitkeep
+
+# Operating system metadata
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+
+# Office / Word temp files
+~$*.docx
+*.tmp
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IDE & Editor configs
+.vscode/
+.idea/
+*.swp
+*.bak

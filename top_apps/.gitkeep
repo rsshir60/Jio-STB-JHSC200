@@ -1,0 +1,2 @@
+# This file ensures the top_apps directory is preserved in version control.
+# Downloaded APK binaries are excluded from Git to prevent repository bloat (>100MB limit).
