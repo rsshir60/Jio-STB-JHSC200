@@ -118,6 +118,11 @@ c:\Users\SUPRIYA\Desktop\jiostb\
 ### Phase 0: Host Environment & Prerequisites
 
 Execute on a Windows 10/11 x64 host machine:
+* **Clone the Repository:**
+  ```cmd
+  git clone --recurse-submodules https://github.com/rsshir60/Jio-STB-JHSC200.git
+  cd Jio-STB-JHSC200
+  ```
 * **Docker Desktop**: Active and running Linux containers.
 * **Python 3.10+**: Available in system `PATH`.
 * **Technitium DNS Server**: Installed and listening on `127.0.0.1:5380`.

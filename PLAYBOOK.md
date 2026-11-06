@@ -80,7 +80,12 @@ The script `sideload-jiostb/jhs/forge_emudhra_chain.py` defeats this check:
 
 ### Stage 0: Host Setup & Network Preparation
 
-1. **Verify Host Services:**
+1. **Clone Repository with Submodules:**
+   ```cmd
+   git clone --recurse-submodules https://github.com/rsshir60/Jio-STB-JHSC200.git
+   cd Jio-STB-JHSC200
+   ```
+2. **Verify Host Services:**
    Ensure Docker Desktop is running:
    ```cmd
    docker ps
