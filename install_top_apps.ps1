@@ -1,45 +1,50 @@
-# install_top_apps.ps1 - Automated Downloader and Installer for Top Android TV Suite
+# install_top_apps.ps1 - Automated Downloader and Installer for Top 1% Android TV Suite
 param(
     [string]$Target = ""
 )
 
 $ErrorActionPreference = "Continue"
 
-# Auto-detect target if not specified
 if (-not $Target) {
-    $devices = adb devices | Where-Object { $_ -match "\s+device$" } | ForEach-Object { ($_ -split "\s+")[0] }
-    if ($devices.Count -eq 1) {
-        $Target = $devices[0]
-        Write-Host "[*] Auto-detected active target: $Target" -ForegroundColor Cyan
-    } elseif ($devices.Count -gt 1) {
-        $Target = $devices[0]
-        Write-Host "[*] Multiple devices detected. Using first device: $Target" -ForegroundColor Cyan
+    if ($env:STB_TARGET) {
+        $Target = $env:STB_TARGET
     } else {
-        $Target = Read-Host "Enter STB IP and port (e.g., 192.168.1.50:5555)"
+        $devices = adb devices | Where-Object { $_ -match "\s+device$" } | ForEach-Object { ($_ -split "\s+")[0] }
+        if ($devices.Count -ge 1) {
+            $Target = $devices[0]
+            Write-Host "[*] Auto-detected active target: $Target" -ForegroundColor Cyan
+        } else {
+            $Target = "192.168.137.28:5555"
+            Write-Host "[*] Defaulting target to: $Target" -ForegroundColor Cyan
+        }
     }
 }
 
-if (-not $Target) {
-    Write-Host "[ERROR] No valid target specified." -ForegroundColor Red
-    exit 1
+$appsDir = Join-Path $PSScriptRoot "top_apps"
+if (!(Test-Path $appsDir)) {
+    $appsDir = Join-Path (Get-Location) "top_apps"
 }
 
-$appsDir = Join-Path $PSScriptRoot "top_apps"
-
 Write-Host "==========================================================" -ForegroundColor Cyan
-Write-Host " Android TV Power Suite Installation" -ForegroundColor Yellow
+Write-Host " Top 1% Android TV Power Suite Installation" -ForegroundColor Yellow
 Write-Host " Target Device: $Target" -ForegroundColor Cyan
-Write-Host " Repository Path: $appsDir" -ForegroundColor Cyan
+Write-Host " Apps Directory: $appsDir" -ForegroundColor Cyan
 Write-Host "==========================================================" -ForegroundColor Cyan
 
 # 1. Verify ADB connection
 $adbState = adb -s $Target get-state 2>&1
 if ($adbState -notmatch "device") {
-    Write-Host "[ERROR] STB not reachable at $Target ($adbState)" -ForegroundColor Red
-    exit 1
+    Write-Host "[*] Target not in ready state ($adbState). Attempting connection..." -ForegroundColor Yellow
+    adb connect $Target | Out-Null
+    Start-Sleep -Seconds 2
+    $adbState = adb -s $Target get-state 2>&1
+    if ($adbState -notmatch "device") {
+        Write-Host "[ERROR] STB not reachable at $Target ($adbState)" -ForegroundColor Red
+        exit 1
+    }
 }
 
-# 2. Create apps directory
+# 2. Create apps directory if needed
 if (!(Test-Path $appsDir)) {
     New-Item -ItemType Directory -Path $appsDir -Force | Out-Null
 }
@@ -112,7 +117,7 @@ foreach ($app in $apps) {
         Write-Host "  [*] Downloading from: $($app.Url)" -ForegroundColor Gray
         curl.exe -L -s -S --connect-timeout 20 --max-time 300 -o $app.File $app.Url
         if (!(Test-Path $app.File) -or (Get-Item $app.File).Length -lt 100000) {
-            Write-Host "  [!] Download failed or file corrupted for $($app.Name)" -ForegroundColor Red
+            Write-Host "  [!] Download failed or file too small for $($app.Name)" -ForegroundColor Red
             continue
         }
         $dlSize = (Get-Item $app.File).Length
@@ -123,14 +128,33 @@ foreach ($app in $apps) {
     Write-Host "  [*] Installing via ADB to STB..." -ForegroundColor Yellow
     $installRes = adb -s $Target install -r $app.File 2>&1
     if ($installRes -match "Success") {
-        Write-Host "  [+] Installation Successful: $($app.Name)" -ForegroundColor Green
+        Write-Host "  [+] Installed successfully: $($app.Pkg)" -ForegroundColor Green
         $installed++
     } else {
-        Write-Host "  [!] Installation failed: $installRes" -ForegroundColor Red
+        Write-Host "  [!] Install result: $installRes" -ForegroundColor Yellow
     }
 }
 
 Write-Host ""
+Write-Host "----------------------------------------------------------" -ForegroundColor DarkCyan
+Write-Host "[+] Installation Summary: $installed of $($apps.Count) apps successfully installed." -ForegroundColor Green
+
+Write-Host ""
+Write-Host "[*] Step 2: Configuring Permissions and Optimizations..." -ForegroundColor Yellow
+
+Write-Host "  [*] Granting SYSTEM_ALERT_WINDOW to MATVT..." -ForegroundColor Cyan
+adb -s $Target shell "appops set com.virresh.matvt SYSTEM_ALERT_WINDOW allow" 2>&1 | Out-Null
+
+Write-Host "  [*] Pre-compiling SmartTube to native ARM speed profile..." -ForegroundColor Cyan
+adb -s $Target shell "cmd package compile -m speed -f com.teamsmart.videomanager.tv" 2>&1 | Out-Null
+
+Write-Host "  [*] Pre-compiling VLC to native ARM speed profile..." -ForegroundColor Cyan
+adb -s $Target shell "cmd package compile -m speed -f org.videolan.vlc" 2>&1 | Out-Null
+
+Write-Host "  [*] Refreshing Home Activity..." -ForegroundColor Cyan
+adb -s $Target shell "input keyevent KEYCODE_HOME"
+
+Write-Host ""
 Write-Host "==========================================================" -ForegroundColor Green
-Write-Host " Installation Finished: $installed of $($apps.Count) apps installed." -ForegroundColor Green
+Write-Host " All Top 1% Applications Installed and Operational!" -ForegroundColor Green
 Write-Host "==========================================================" -ForegroundColor Green

@@ -1,6 +1,16 @@
-# Compiled APK downloads (downloaded dynamically via install_top_apps.ps1)
+# Compiled APK binaries & archives
+*.apk
+*.aab
 top_apps/*.apk
+top_apps/*.zip
 !top_apps/.gitkeep
+!sideload-jiostb/monet-launcher.apk
+!sideload-jiostb/shevery-release.apk
+!sideload-jiostb/rootshell2.jar
+
+# Agent internal scratch directories
+.agents/
+scratch/
 
 # Operating system metadata
 Thumbs.db

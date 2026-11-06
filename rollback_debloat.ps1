@@ -1,27 +1,23 @@
-# rollback_debloat.ps1 - Instant Restoration of All Debloated Packages on Jio STB
+# rollback_debloat.ps1 - Instant Restoration of All Debloated Packages on Jio STB JHSC200 / JMSC200
 param(
     [string]$Target = ""
 )
 
 $ErrorActionPreference = "Continue"
 
-# Auto-detect target if not specified
 if (-not $Target) {
-    $devices = adb devices | Where-Object { $_ -match "\s+device$" } | ForEach-Object { ($_ -split "\s+")[0] }
-    if ($devices.Count -eq 1) {
-        $Target = $devices[0]
-        Write-Host "[*] Auto-detected active target: $Target" -ForegroundColor Cyan
-    } elseif ($devices.Count -gt 1) {
-        $Target = $devices[0]
-        Write-Host "[*] Multiple devices detected. Using first device: $Target" -ForegroundColor Cyan
+    if ($env:STB_TARGET) {
+        $Target = $env:STB_TARGET
     } else {
-        $Target = Read-Host "Enter STB IP and port (e.g., 192.168.1.50:5555)"
+        $devices = adb devices | Where-Object { $_ -match "\s+device$" } | ForEach-Object { ($_ -split "\s+")[0] }
+        if ($devices.Count -ge 1) {
+            $Target = $devices[0]
+            Write-Host "[*] Auto-detected active target: $Target" -ForegroundColor Cyan
+        } else {
+            $Target = "192.168.137.28:5555"
+            Write-Host "[*] Defaulting target to: $Target" -ForegroundColor Cyan
+        }
     }
-}
-
-if (-not $Target) {
-    Write-Host "[ERROR] No valid target specified." -ForegroundColor Red
-    exit 1
 }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
@@ -32,8 +28,14 @@ Write-Host "==========================================================" -Foregro
 # Test ADB connectivity
 $adbCheck = adb -s $Target get-state 2>&1
 if ($adbCheck -notmatch "device") {
-    Write-Host "[ERROR] ADB device not responding at $Target. Output: $adbCheck" -ForegroundColor Red
-    exit 1
+    Write-Host "[*] Target not in ready state ($adbCheck). Attempting connection..." -ForegroundColor Yellow
+    adb connect $Target | Out-Null
+    Start-Sleep -Seconds 2
+    $adbCheck = adb -s $Target get-state 2>&1
+    if ($adbCheck -notmatch "device") {
+        Write-Host "[ERROR] ADB device not responding at $Target. Output: $adbCheck" -ForegroundColor Red
+        exit 1
+    }
 }
 
 $packagesToEnable = @(
@@ -74,17 +76,17 @@ $packagesToEnable = @(
 )
 
 Write-Host "`n[*] Restoring all debloated packages..." -ForegroundColor Yellow
-$enabledCount = 0
+$restoredCount = 0
 foreach ($pkg in $packagesToEnable) {
     $res = adb -s $Target shell "pm enable $pkg" 2>&1
-    if ($res -match "new state: enabled" -or $res -match "enabled") {
+    if ($res -match "enabled" -or $res -match "new state: enabled") {
         Write-Host "  [+] Enabled: $pkg" -ForegroundColor Green
-        $enabledCount++
+        $restoredCount++
     } else {
         Write-Host "  [-] $pkg : $res" -ForegroundColor Gray
     }
 }
-Write-Host "[+] Total packages restored: $enabledCount of $($packagesToEnable.Count)" -ForegroundColor Green
+Write-Host "[+] Total packages restored: $restoredCount of $($packagesToEnable.Count)" -ForegroundColor Green
 
 Write-Host "`n[*] Resetting animation scales to default 1.0x..." -ForegroundColor Yellow
 adb -s $Target shell "settings put global window_animation_scale 1.0"
@@ -93,5 +95,5 @@ adb -s $Target shell "settings put global animator_duration_scale 1.0"
 Write-Host "  [+] UI animations reset to 1.0x" -ForegroundColor Green
 
 Write-Host "`n==========================================================" -ForegroundColor Green
-Write-Host " Rollback Complete! STB restored to stock package states." -ForegroundColor Green
+Write-Host " Rollback Complete! STB restored to factory package states." -ForegroundColor Green
 Write-Host "==========================================================" -ForegroundColor Green

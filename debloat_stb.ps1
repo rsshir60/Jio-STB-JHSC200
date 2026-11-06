@@ -5,23 +5,19 @@ param(
 
 $ErrorActionPreference = "Continue"
 
-# Auto-detect target if not specified
 if (-not $Target) {
-    $devices = adb devices | Where-Object { $_ -match "\s+device$" } | ForEach-Object { ($_ -split "\s+")[0] }
-    if ($devices.Count -eq 1) {
-        $Target = $devices[0]
-        Write-Host "[*] Auto-detected active target: $Target" -ForegroundColor Cyan
-    } elseif ($devices.Count -gt 1) {
-        $Target = $devices[0]
-        Write-Host "[*] Multiple devices detected. Using first device: $Target" -ForegroundColor Cyan
+    if ($env:STB_TARGET) {
+        $Target = $env:STB_TARGET
     } else {
-        $Target = Read-Host "Enter STB IP and port (e.g., 192.168.1.50:5555)"
+        $devices = adb devices | Where-Object { $_ -match "\s+device$" } | ForEach-Object { ($_ -split "\s+")[0] }
+        if ($devices.Count -ge 1) {
+            $Target = $devices[0]
+            Write-Host "[*] Auto-detected active target: $Target" -ForegroundColor Cyan
+        } else {
+            $Target = "192.168.137.28:5555"
+            Write-Host "[*] Defaulting target to: $Target" -ForegroundColor Cyan
+        }
     }
-}
-
-if (-not $Target) {
-    Write-Host "[ERROR] No valid target specified." -ForegroundColor Red
-    exit 1
 }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
@@ -32,8 +28,14 @@ Write-Host "==========================================================" -Foregro
 # Test ADB connectivity
 $adbCheck = adb -s $Target get-state 2>&1
 if ($adbCheck -notmatch "device") {
-    Write-Host "[ERROR] ADB device not responding at $Target. Output: $adbCheck" -ForegroundColor Red
-    exit 1
+    Write-Host "[*] Target not in ready state ($adbCheck). Attempting connection..." -ForegroundColor Yellow
+    adb connect $Target | Out-Null
+    Start-Sleep -Seconds 2
+    $adbCheck = adb -s $Target get-state 2>&1
+    if ($adbCheck -notmatch "device") {
+        Write-Host "[ERROR] ADB device not responding at $Target. Output: $adbCheck" -ForegroundColor Red
+        exit 1
+    }
 }
 
 $packagesToDisable = @(
@@ -106,10 +108,13 @@ Write-Host "  [+] ActivityManager cache bounds & storage cache trimmed" -Foregro
 
 Write-Host "`n[*] Step 4: ART Ahead-Of-Time (AOT) Machine Compilation..." -ForegroundColor Yellow
 $aotApps = @(
+    "com.spocky.projengmenu",
     "com.klevico.monet",
     "in.startv.hotstar",
     "com.amazon.amazonvideo.livingroom",
-    "com.netflix.ninja"
+    "com.netflix.ninja",
+    "com.teamsmart.videomanager.tv",
+    "org.videolan.vlc"
 )
 foreach ($app in $aotApps) {
     Write-Host "  [*] Pre-compiling $app to native speed profile..." -ForegroundColor Cyan
