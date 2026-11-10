@@ -86,7 +86,13 @@ c:\Users\SUPRIYA\Desktop\jiostb\
 ├── projectivy_homescreen.png   # 1080p verified launcher capture artifact
 ├── scripts/
 │   ├── configure_projectivy.ps1# Projectivy v4.73 setup & Accessibility binding
-│   └── run_e2e_tests.ps1       # Comprehensive 4-tier automated test harness
+│   ├── run_e2e_tests.ps1       # Comprehensive 4-tier automated test harness
+│   ├── freeze_worst_apps.ps1   # Aggressive RAM & drain package freezer
+│   ├── sync_tvfilebox.sh       # TVFileBox scoped storage auto-sync daemon
+│   ├── bt_fix_aavante.sh       # Bluetooth A2DP audio & soundbar connection fix
+│   ├── bt_autoaccept.sh        # Automated Bluetooth pairing dialog accepter
+│   ├── check_hotspot.ps1       # Windows WinRT hotspot client inspection tool
+│   └── static_ip.sh            # Target device static IP configuration script
 ├── tests/
 │   └── find_stb.ps1            # Multi-subnet parallel port 5555 probe
 ├── sideload-jiostb/            # TR-069 exploit suite & GenieACS MITM engine
@@ -95,6 +101,7 @@ c:\Users\SUPRIYA\Desktop\jiostb\
 │   ├── pull_boot.sh            # Boot partition dumper
 │   ├── jhs/
 │   │   ├── forge_emudhra_chain.py  # Cryptographic X.509 cert synthesizer
+│   │   ├── standalone_jhs_server.py# Zero-dependency Standalone ACS + DNS server
 │   │   ├── jhs_stage1.sh           # JHSC200-specific CWMP pipeline
 │   │   └── run_acs.sh              # Automated cert minting & TLS proxy runner
 │   └── tls/
@@ -167,6 +174,20 @@ Because Jio removes DNS settings from standard menus, use the USB redirection bu
 ---
 
 ### Phase 2: Technitium DNS & TLS Backend Deployment
+
+#### Option A: Zero-Dependency Standalone Python Server (Recommended for JHSC200 / Android 11)
+Bypass Docker, GenieACS, and Technitium completely using the standalone Python server:
+```cmd
+python sideload-jiostb\jhs\standalone_jhs_server.py
+```
+*What this runs automatically in a single unified script:*
+- **Selective DNS Server (UDP :53):** Resolves `*.jio.com` and `acs.oss.jio.com` directly to your Host PC IP, while passing all external queries (NTP, Google, connectivity check) to `8.8.8.8`.
+- **Captive Portal Responder (HTTP :80):** Serves `204 No Content` to ensure the STB network check completes without error.
+- **Synthesized eMudhra TLS Server (Ports 8443 / 9443):** Handles secure CWMP transactions using `tls/forged_chain.pem`.
+- **CWMP SOAP Engine:** Intercepts `Inform`, transmits `SetParameterValues` (enabling persistent ADB on port 5555 and disabling carrier OTA daemons), and returns `204 No Content`.
+- **Automated ADB Watchdog:** Monitors port 5555 and auto-executes post-setup steps upon connection.
+
+#### Option B: Standard Docker + Technitium Setup (All Box Variants)
 
 1. **Configure DNS Override**:
    - Open `http://localhost:5380` in your host browser.
@@ -333,6 +354,33 @@ The test harness evaluates **31 discrete criteria across 4 execution tiers**:
 
 ---
 
+### Phase 9: Audio, Storage & Extended RAM Optimization
+
+#### 1. Bluetooth A2DP Soundbar / Audio Fix (`scripts/bt_fix_aavante.sh`)
+Carrier Android TV builds frequently restrict Bluetooth audio policies, causing soundbars (e.g., boAt Aavante Bar 610) to pair without routing audio.
+```cmd
+adb push scripts\bt_fix_aavante.sh /data/local/tmp/
+adb shell sh /data/local/tmp/bt_fix_aavante.sh
+```
+*Forces `a2dp_connection_policy = 100 (ALLOWED)` in SQLite database `bt_config.db` / `bt_config.conf` and automates pairing authorization.*
+
+#### 2. TVFileBox Scoped Storage Auto-Sync Daemon (`scripts/sync_tvfilebox.sh`)
+Android 11 isolates app storage. Files uploaded over LAN through TVFileBox remain sandboxed in `/storage/emulated/0/Android/data/com.example.tvfilebox/files/uploads`.
+Deploy the background daemon:
+```cmd
+adb push scripts\sync_tvfilebox.sh /data/local/tmp/
+adb shell "nohup sh /data/local/tmp/sync_tvfilebox.sh >/dev/null 2>&1 &"
+```
+*Monitors uploads, instantly moves files to `/storage/emulated/0/Movies/`, and triggers `MEDIA_SCANNER_SCAN_FILE` so VLC and Kodi index media immediately.*
+
+#### 3. Aggressive RAM & Battery/CPU Drain Debloat (`scripts/freeze_worst_apps.ps1`)
+To extend memory headroom past 750 MB by freezing 14 additional non-essential daemons (`com.jio.controlcentre`, `com.android.app.jio.voiceassist`, `com.rjl.mobileremote.receiver`, `com.jio.jiopay`, `com.reverie.swalekh.abctv`, `com.jio.yt`, print spoolers, TTS, wallpaper backup):
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\freeze_worst_apps.ps1 -Target "192.168.137.28:5555"
+```
+
+---
+
 ## 🎛 The Interactive Operator Console (`run.bat`)
 
 For daily operations, double-click `run.bat` to launch the menu-driven operator interface:
@@ -344,9 +392,22 @@ For daily operations, double-click `run.bat` to launch the menu-driven operator 
  [1] Check Connected ADB Devices
  [2] Connect to STB over Network ADB (Default: 192.168.137.28:5555)
  [3] Scan Local Subnets for Active STBs (Port 5555 Probe)
- [4] Run TR-069 Pre-Flight Doctor Check (doctor.py --quick)
- [5] Run Surgical Debloat, Telemetry Freeze & Performance Tuning
- [6] Deploy Projectivy Launcher v4.73 Modernization Suite
+ [4] Run Standalone Zero-Dependency JHS ACS + DNS Server (standalone_jhs_server.py)
+ [5] Run TR-069 Pre-Flight Doctor Check (doctor.py --quick)
+ [6] Run Surgical Debloat & Performance Optimization (debloat_stb.ps1)
+ [7] Run Aggressive RAM & Drain Disablement (freeze_worst_apps.ps1)
+ [8] Deploy Projectivy Launcher v4.73 Modernization Suite
+ [9] Install Top 1% Android TV Power Suite (SmartTube, TV Bro, VLC, etc.)
+ [10] Deploy TVFileBox Auto-Sync Daemon (sync_tvfilebox.sh)
+ [11] Apply Bluetooth A2DP Audio / Soundbar Fix (bt_fix_aavante.sh)
+ [12] Run Comprehensive 4-Tier E2E Test Suite (run_e2e_tests.ps1)
+ [13] Inspect Mobile Hotspot State & Connected Clients (check_hotspot.ps1)
+ [14] Capture High-Res Screencap to Working Directory
+ [15] Open Interactive Remote ADB Shell
+ [16] Rollback Debloat (Restore All Factory System Packages)
+ [17] Exit
+===============================================================================
+```
  [7] Install Top 1% Android TV Power Suite (SmartTube, TV Bro, VLC, etc.)
  [8] Run Comprehensive 4-Tier E2E Test Suite (run_e2e_tests.ps1)
  [9] Rollback Debloat (Restore All Factory System Packages)

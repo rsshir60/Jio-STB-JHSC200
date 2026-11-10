@@ -124,6 +124,20 @@ Because Jio locks network configuration, use the media storage redirect:
 
 ### Stage 2: Deploying Local ACS & TLS Proxy
 
+#### Path A: Zero-Dependency Standalone Python Server (Zero Docker / Zero Technitium)
+For JHSC200 / Android 11, execute directly from Command Prompt or PowerShell:
+```cmd
+python sideload-jiostb\jhs\standalone_jhs_server.py
+```
+*Unified capabilities:*
+- **Selective DNS (UDP 53):** Redirects `acs.oss.jio.com` and `*.jio.com` to Host IP, while forwarding all other queries to `8.8.8.8`.
+- **Captive Portal Responder (HTTP 80):** Answers with `204 No Content` to ensure connectivity checks succeed.
+- **Synthesized eMudhra TLS Server (Ports 8443 / 9443):** Handles TLS handshakes using `tls/forged_chain.pem`.
+- **CWMP Engine:** Responds to `Inform` with `SetParameterValues` granting persistent ADB on port 5555 and disabling carrier OTA daemons.
+- **ADB Watchdog:** Monitors port 5555 and automates post-setup steps upon connection.
+
+#### Path B: Standard Docker + Technitium Setup (All Box Variants)
+
 1. **Configure Technitium DNS:**
    - Browse to `http://localhost:5380`.
    - Add Primary Zone: `jio.com`.
@@ -345,6 +359,35 @@ Test Summary: 31 Passed, 0 Failed, 0 Inconclusive
 Result: 100% OPERATIONAL EXCELLENCE ACHIEVED
 ================================================================================
 ```
+
+---
+
+### Stage 9: Audio, Storage & Extended RAM Optimization
+
+#### 1. Bluetooth A2DP Soundbar / Audio Fix (`scripts/bt_fix_aavante.sh`)
+Carrier firmware enforces restrictive Bluetooth connection policies, often allowing Bluetooth soundbars (e.g. boAt Aavante Bar 610) to bond without routing A2DP media audio.
+To remediate:
+```cmd
+adb push scripts\bt_fix_aavante.sh /data/local/tmp/
+adb shell sh /data/local/tmp/bt_fix_aavante.sh
+```
+*Directly updates SQLite database `bt_config.db` setting `a2dp_connection_policy = 100 (ALLOWED)` for the device MAC address and triggers an accessories reconnection.*
+
+#### 2. TVFileBox Scoped Storage Auto-Sync Daemon (`scripts/sync_tvfilebox.sh`)
+Android 11 scoped storage isolates files uploaded through TVFileBox to `/storage/emulated/0/Android/data/com.example.tvfilebox/files/uploads`.
+To make uploads accessible to system media players (VLC, Kodi) automatically:
+```cmd
+adb push scripts\sync_tvfilebox.sh /data/local/tmp/
+adb shell "nohup sh /data/local/tmp/sync_tvfilebox.sh >/dev/null 2>&1 &"
+```
+*Continuously polls the scoped uploads directory, moves complete files to `/storage/emulated/0/Movies/`, and broadcasts `android.intent.action.MEDIA_SCANNER_SCAN_FILE`.*
+
+#### 3. Aggressive RAM & Drain Disablement (`scripts/freeze_worst_apps.ps1`)
+To reclaim an additional 120-150 MB of physical RAM by freezing 14 extra background consumers:
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\freeze_worst_apps.ps1 -Target "192.168.137.28:5555"
+```
+*Packages frozen:* `com.jio.controlcentre`, `com.android.app.jio.voiceassist`, `com.rjl.mobileremote.receiver`, `com.jio.jiopay`, `com.reverie.swalekh.abctv`, `com.jio.yt`, `com.android.printspooler`, `com.android.bips`, `com.android.printservice.recommendation`, `com.svox.pico`, `com.android.dreams.basic`, `com.android.companiondevicemanager`, `com.android.wallpaperbackup`, `com.android.sharedstoragebackup`.
 
 ---
 

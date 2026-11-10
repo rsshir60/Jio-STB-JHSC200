@@ -1086,11 +1086,12 @@
           <input type="search" id="pkgSearch" class="search-input" placeholder="Filter by package or name..." oninput="filterPackages()">
         </search>
         <div class="tier-filters">
-          <button class="tier-chip active" onclick="setTierFilter('all', this)">All (34)</button>
+          <button class="tier-chip active" onclick="setTierFilter('all', this)">All (48)</button>
           <button class="tier-chip" onclick="setTierFilter('Tier 1', this)">Tier 1: Telemetry (11)</button>
           <button class="tier-chip" onclick="setTierFilter('Tier 2', this)">Tier 2: Bloatware (18)</button>
           <button class="tier-chip" onclick="setTierFilter('Tier 3', this)">Tier 3: Ads (4)</button>
           <button class="tier-chip" onclick="setTierFilter('Tier 4', this)">Tier 4: Tuner (1)</button>
+          <button class="tier-chip" onclick="setTierFilter('Tier 5', this)">Tier 5: Extended Drain (14)</button>
         </div>
       </div>
 
@@ -1433,7 +1434,21 @@
       { name: "com.jio.adc.aka", tier: "Tier 3", cat: "Ad Engine", impact: "Disables fullscreen video ad injection" },
       { name: "com.jiostb.inactivitytimer", tier: "Tier 3", cat: "Ad Engine", impact: "Prevents ad activation on idle remote" },
       { name: "com.iwedia.notificationservice", tier: "Tier 3", cat: "Push Ads", impact: "Stops carrier notification toast popups" },
-      { name: "com.jio.stb.catv", tier: "Tier 4", cat: "Hardware", impact: "Disables DVB-C cable tuner driver service" }
+      { name: "com.jio.stb.catv", tier: "Tier 4", cat: "Hardware", impact: "Disables DVB-C cable tuner driver service" },
+      { name: "com.jio.controlcentre", tier: "Tier 5", cat: "Extended Bloat", impact: "Disables background control centre overlay service" },
+      { name: "com.android.app.jio.voiceassist", tier: "Tier 5", cat: "Extended Bloat", impact: "Halts unused voice assistant listener" },
+      { name: "com.rjl.mobileremote.receiver", tier: "Tier 5", cat: "Extended Bloat", impact: "Stops mobile remote daemon listening on ports" },
+      { name: "com.jio.jiopay", tier: "Tier 5", cat: "Extended Bloat", impact: "Removes carrier payment daemon" },
+      { name: "com.reverie.swalekh.abctv", tier: "Tier 5", cat: "Extended Bloat", impact: "Disables regional keyboard background IME" },
+      { name: "com.jio.yt", tier: "Tier 5", cat: "Extended Bloat", impact: "Removes stock web YouTube wrapper" },
+      { name: "com.android.printspooler", tier: "Tier 5", cat: "System Drain", impact: "Stops print spooler service on TV" },
+      { name: "com.android.bips", tier: "Tier 5", cat: "System Drain", impact: "Disables built-in print service" },
+      { name: "com.android.printservice.recommendation", tier: "Tier 5", cat: "System Drain", impact: "Disables print recommendations" },
+      { name: "com.svox.pico", tier: "Tier 5", cat: "System Drain", impact: "Halts legacy Pico TTS engine" },
+      { name: "com.android.dreams.basic", tier: "Tier 5", cat: "System Drain", impact: "Disables basic screensaver dream engine" },
+      { name: "com.android.companiondevicemanager", tier: "Tier 5", cat: "System Drain", impact: "Stops companion device scan listener" },
+      { name: "com.android.wallpaperbackup", tier: "Tier 5", cat: "System Drain", impact: "Stops wallpaper backup sync" },
+      { name: "com.android.sharedstoragebackup", tier: "Tier 5", cat: "System Drain", impact: "Stops shared storage backup watchdog" }
     ];
 
     // E2E Test Suite Matrix (31 Tests)
