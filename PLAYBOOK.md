@@ -389,6 +389,14 @@ powershell -ExecutionPolicy Bypass -File .\scripts\freeze_worst_apps.ps1 -Target
 ```
 *Packages frozen:* `com.jio.controlcentre`, `com.android.app.jio.voiceassist`, `com.rjl.mobileremote.receiver`, `com.jio.jiopay`, `com.reverie.swalekh.abctv`, `com.jio.yt`, `com.android.printspooler`, `com.android.bips`, `com.android.printservice.recommendation`, `com.svox.pico`, `com.android.dreams.basic`, `com.android.companiondevicemanager`, `com.android.wallpaperbackup`, `com.android.sharedstoragebackup`.
 
+#### 4. Volatile Hardware Decoders & SurfaceFlinger Properties (`scripts/boot_tuning.ps1`)
+On Amlogic user builds, hardware decoder and SurfaceFlinger properties reset across reboots because SELinux restricts persistent property creation for untrusted apps.
+Execute on reconnect:
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\boot_tuning.ps1 -STB "192.168.137.28:5555"
+```
+*Enforces hardware decode for MPEG2/AVC/HEVC/VP9, SurfaceFlinger 2000ms idle timer, OpenGL HWUI rendering, Dalvik 4-thread compilation, and auto-starts background voice service.*
+
 ---
 
 ## 4. Troubleshooting & Recovery Matrix

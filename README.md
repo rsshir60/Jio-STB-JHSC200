@@ -381,6 +381,16 @@ powershell -ExecutionPolicy Bypass -File .\scripts\freeze_worst_apps.ps1 -Target
 
 ---
 
+#### 4. Volatile Hardware Decoders & SurfaceFlinger Properties (`scripts/boot_tuning.ps1`)
+On Amlogic user builds, hardware decoder and SurfaceFlinger properties reset across reboots because SELinux restricts persistent property creation for untrusted apps.
+Execute on reconnect:
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\boot_tuning.ps1 -STB "192.168.137.28:5555"
+```
+*Enforces hardware decode for MPEG2/AVC/HEVC/VP9, SurfaceFlinger 2000ms idle timer, OpenGL HWUI rendering, Dalvik 4-thread compilation, and auto-starts background voice service.*
+
+---
+
 ## 🎛 The Interactive Operator Console (`run.bat`)
 
 For daily operations, double-click `run.bat` to launch the menu-driven operator interface:
@@ -396,25 +406,17 @@ For daily operations, double-click `run.bat` to launch the menu-driven operator 
  [5] Run TR-069 Pre-Flight Doctor Check (doctor.py --quick)
  [6] Run Surgical Debloat & Performance Optimization (debloat_stb.ps1)
  [7] Run Aggressive RAM & Drain Disablement (freeze_worst_apps.ps1)
- [8] Deploy Projectivy Launcher v4.73 Modernization Suite
- [9] Install Top 1% Android TV Power Suite (SmartTube, TV Bro, VLC, etc.)
- [10] Deploy TVFileBox Auto-Sync Daemon (sync_tvfilebox.sh)
- [11] Apply Bluetooth A2DP Audio / Soundbar Fix (bt_fix_aavante.sh)
- [12] Run Comprehensive 4-Tier E2E Test Suite (run_e2e_tests.ps1)
- [13] Inspect Mobile Hotspot State & Connected Clients (check_hotspot.ps1)
- [14] Capture High-Res Screencap to Working Directory
- [15] Open Interactive Remote ADB Shell
- [16] Rollback Debloat (Restore All Factory System Packages)
- [17] Exit
-===============================================================================
-```
- [7] Install Top 1% Android TV Power Suite (SmartTube, TV Bro, VLC, etc.)
- [8] Run Comprehensive 4-Tier E2E Test Suite (run_e2e_tests.ps1)
- [9] Rollback Debloat (Restore All Factory System Packages)
- [10] Capture High-Res Screencap to Working Directory
- [11] Open Interactive Remote ADB Shell
- [12] Initialize Windows SoftAP / Hotspot (start_hotspot.ps1)
- [13] Exit
+ [8] Apply Volatile Hardware Codec & SurfaceFlinger Properties (boot_tuning.ps1)
+ [9] Deploy Projectivy Launcher v4.73 Modernization Suite
+ [10] Install Top 1% Android TV Power Suite (SmartTube, TV Bro, VLC, etc.)
+ [11] Deploy TVFileBox Auto-Sync Daemon (sync_tvfilebox.sh)
+ [12] Apply Bluetooth A2DP Audio / Soundbar Fix (bt_fix_aavante.sh)
+ [13] Run Comprehensive 4-Tier E2E Test Suite (run_e2e_tests.ps1)
+ [14] Inspect Mobile Hotspot State & Connected Clients (check_hotspot.ps1)
+ [15] Capture High-Res Screencap to Working Directory
+ [16] Open Interactive Remote ADB Shell
+ [17] Rollback Debloat (Restore All Factory System Packages)
+ [18] Exit
 ===============================================================================
 ```
 
