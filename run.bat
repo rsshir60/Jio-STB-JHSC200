@@ -16,18 +16,20 @@ echo  [5] Run TR-069 Pre-Flight Doctor Check (doctor.py --quick)
 echo  [6] Run Surgical Debloat & Performance Optimization (debloat_stb.ps1)
 echo  [7] Run Aggressive RAM & Drain Disablement (freeze_worst_apps.ps1)
 echo  [8] Apply Volatile Hardware Codec & SurfaceFlinger Properties (boot_tuning.ps1)
-echo  [9] Deploy Projectivy Launcher v4.73 Modernization Suite
-echo  [10] Install Top 1%% Android TV Power Suite (SmartTube, TV Bro, VLC, etc.)
-echo  [11] Deploy TVFileBox Auto-Sync Daemon (sync_tvfilebox.sh)
-echo  [12] Apply Bluetooth A2DP Audio / Soundbar Fix (bt_fix_aavante.sh)
-echo  [13] Run Comprehensive 4-Tier E2E Test Suite (run_e2e_tests.ps1)
-echo  [14] Inspect Mobile Hotspot State & Connected Clients (check_hotspot.ps1)
-echo  [15] Capture High-Res Screencap to Working Directory
-echo  [16] Open Interactive Remote ADB Shell
-echo  [17] Rollback Debloat (Restore All Factory System Packages)
-echo  [18] Exit
+echo  [9] Deploy Autonomous On-Device Boot Script (on_device_boot_init.sh)
+echo  [10] Deploy Projectivy Launcher v4.73 Modernization Suite
+echo  [11] Install Top 1%% Android TV Power Suite (SmartTube, TV Bro, VLC, etc.)
+echo  [12] Deploy TVFileBox Auto-Sync Daemon (sync_tvfilebox.sh)
+echo  [13] Apply Bluetooth A2DP Audio / Soundbar Fix (bt_fix_aavante.sh)
+echo  [14] Force Privileged Bluetooth Reflection Bond (bt_shizuku_bond.sh)
+echo  [15] Run Comprehensive 4-Tier E2E Test Suite (run_e2e_tests.ps1)
+echo  [16] Inspect Mobile Hotspot State & Connected Clients (check_hotspot.ps1)
+echo  [17] Capture High-Res Screencap to Working Directory
+echo  [18] Open Interactive Remote ADB Shell
+echo  [19] Rollback Debloat (Restore All Factory System Packages)
+echo  [20] Exit
 echo ===============================================================================
-set /p choice="Select an operational task [1-18]: "
+set /p choice="Select an operational task [1-20]: "
 
 if "%choice%"=="1" (
     echo.
@@ -105,7 +107,11 @@ if "%choice%"=="8" (
 
 if "%choice%"=="9" (
     echo.
-    powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\configure_projectivy.ps1"
+    echo [*] Pushing on_device_boot_init.sh to STB...
+    adb push "%~dp0scripts\on_device_boot_init.sh" /data/local/tmp/on_device_boot_init.sh
+    adb shell chmod +x /data/local/tmp/on_device_boot_init.sh
+    echo [*] Executing autonomous boot initialization...
+    adb shell sh /data/local/tmp/on_device_boot_init.sh
     echo.
     pause
     goto MENU
@@ -113,13 +119,21 @@ if "%choice%"=="9" (
 
 if "%choice%"=="10" (
     echo.
-    powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0install_top_apps.ps1"
+    powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\configure_projectivy.ps1"
     echo.
     pause
     goto MENU
 )
 
 if "%choice%"=="11" (
+    echo.
+    powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0install_top_apps.ps1"
+    echo.
+    pause
+    goto MENU
+)
+
+if "%choice%"=="12" (
     echo.
     echo [*] Pushing TVFileBox Scoped Storage Sync Daemon to STB...
     adb push "%~dp0scripts\sync_tvfilebox.sh" /data/local/tmp/sync_tvfilebox.sh
@@ -132,7 +146,7 @@ if "%choice%"=="11" (
     goto MENU
 )
 
-if "%choice%"=="12" (
+if "%choice%"=="13" (
     echo.
     echo [*] Applying Bluetooth A2DP Soundbar Fix to STB...
     adb push "%~dp0scripts\bt_fix_aavante.sh" /data/local/tmp/bt_fix_aavante.sh
@@ -143,7 +157,18 @@ if "%choice%"=="12" (
     goto MENU
 )
 
-if "%choice%"=="13" (
+if "%choice%"=="14" (
+    echo.
+    echo [*] Triggering Privileged Bluetooth Reflection Bond...
+    adb push "%~dp0scripts\bt_shizuku_bond.sh" /data/local/tmp/bt_shizuku_bond.sh
+    adb shell chmod +x /data/local/tmp/bt_shizuku_bond.sh
+    adb shell sh /data/local/tmp/bt_shizuku_bond.sh
+    echo.
+    pause
+    goto MENU
+)
+
+if "%choice%"=="15" (
     echo.
     powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\run_e2e_tests.ps1"
     echo.
@@ -151,7 +176,7 @@ if "%choice%"=="13" (
     goto MENU
 )
 
-if "%choice%"=="14" (
+if "%choice%"=="16" (
     echo.
     powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\check_hotspot.ps1"
     echo.
@@ -159,7 +184,7 @@ if "%choice%"=="14" (
     goto MENU
 )
 
-if "%choice%"=="15" (
+if "%choice%"=="17" (
     echo.
     echo [*] Grabbing framebuffer screencap from STB...
     adb shell screencap -p /sdcard/stb_screencap.png
@@ -171,14 +196,14 @@ if "%choice%"=="15" (
     goto MENU
 )
 
-if "%choice%"=="16" (
+if "%choice%"=="18" (
     echo.
     echo [*] Spawning remote interactive shell (Type 'exit' to return)...
     adb shell
     goto MENU
 )
 
-if "%choice%"=="17" (
+if "%choice%"=="19" (
     echo.
     powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0rollback_debloat.ps1"
     echo.
@@ -186,7 +211,7 @@ if "%choice%"=="17" (
     goto MENU
 )
 
-if "%choice%"=="18" (
+if "%choice%"=="20" (
     exit /b 0
 )
 

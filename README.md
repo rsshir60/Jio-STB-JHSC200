@@ -88,8 +88,11 @@ c:\Users\SUPRIYA\Desktop\jiostb\
 │   ├── configure_projectivy.ps1# Projectivy v4.73 setup & Accessibility binding
 │   ├── run_e2e_tests.ps1       # Comprehensive 4-tier automated test harness
 │   ├── freeze_worst_apps.ps1   # Aggressive RAM & drain package freezer
+│   ├── boot_tuning.ps1         # Volatile hardware decoder & SurfaceFlinger properties
+│   ├── on_device_boot_init.sh  # Autonomous on-device boot persistence initialization
 │   ├── sync_tvfilebox.sh       # TVFileBox scoped storage auto-sync daemon
 │   ├── bt_fix_aavante.sh       # Bluetooth A2DP audio & soundbar connection fix
+│   ├── bt_shizuku_bond.sh      # Privileged Bluetooth reflection bonding via app_process
 │   ├── bt_autoaccept.sh        # Automated Bluetooth pairing dialog accepter
 │   ├── check_hotspot.ps1       # Windows WinRT hotspot client inspection tool
 │   └── static_ip.sh            # Target device static IP configuration script
@@ -407,16 +410,18 @@ For daily operations, double-click `run.bat` to launch the menu-driven operator 
  [6] Run Surgical Debloat & Performance Optimization (debloat_stb.ps1)
  [7] Run Aggressive RAM & Drain Disablement (freeze_worst_apps.ps1)
  [8] Apply Volatile Hardware Codec & SurfaceFlinger Properties (boot_tuning.ps1)
- [9] Deploy Projectivy Launcher v4.73 Modernization Suite
- [10] Install Top 1% Android TV Power Suite (SmartTube, TV Bro, VLC, etc.)
- [11] Deploy TVFileBox Auto-Sync Daemon (sync_tvfilebox.sh)
- [12] Apply Bluetooth A2DP Audio / Soundbar Fix (bt_fix_aavante.sh)
- [13] Run Comprehensive 4-Tier E2E Test Suite (run_e2e_tests.ps1)
- [14] Inspect Mobile Hotspot State & Connected Clients (check_hotspot.ps1)
- [15] Capture High-Res Screencap to Working Directory
- [16] Open Interactive Remote ADB Shell
- [17] Rollback Debloat (Restore All Factory System Packages)
- [18] Exit
+ [9] Deploy Autonomous On-Device Boot Script (on_device_boot_init.sh)
+ [10] Deploy Projectivy Launcher v4.73 Modernization Suite
+ [11] Install Top 1% Android TV Power Suite (SmartTube, TV Bro, VLC, etc.)
+ [12] Deploy TVFileBox Auto-Sync Daemon (sync_tvfilebox.sh)
+ [13] Apply Bluetooth A2DP Audio / Soundbar Fix (bt_fix_aavante.sh)
+ [14] Force Privileged Bluetooth Reflection Bond (bt_shizuku_bond.sh)
+ [15] Run Comprehensive 4-Tier E2E Test Suite (run_e2e_tests.ps1)
+ [16] Inspect Mobile Hotspot State & Connected Clients (check_hotspot.ps1)
+ [17] Capture High-Res Screencap to Working Directory
+ [18] Open Interactive Remote ADB Shell
+ [19] Rollback Debloat (Restore All Factory System Packages)
+ [20] Exit
 ===============================================================================
 ```
 

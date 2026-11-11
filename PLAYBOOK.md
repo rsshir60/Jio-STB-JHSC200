@@ -395,7 +395,22 @@ Execute on reconnect:
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\boot_tuning.ps1 -STB "192.168.137.28:5555"
 ```
-*Enforces hardware decode for MPEG2/AVC/HEVC/VP9, SurfaceFlinger 2000ms idle timer, OpenGL HWUI rendering, Dalvik 4-thread compilation, and auto-starts background voice service.*
+*Enforces hardware decode for MPEG2/AVC/HEVC/VP9, SurfaceFlinger 2000ms idle timer, OpenGL HWUI rendering, Dalvik 4-thread compilation, starts Shizuku, and auto-starts background voice service.*
+
+#### 5. Autonomous On-Device Boot Persistence (`scripts/on_device_boot_init.sh`)
+Deploys a standalone shell script directly on the STB filesystem to handle tuning and Shizuku server keep-alive autonomously:
+```cmd
+adb push scripts\on_device_boot_init.sh /data/local/tmp/
+adb shell chmod +x /data/local/tmp/on_device_boot_init.sh
+adb shell sh /data/local/tmp/on_device_boot_init.sh
+```
+
+#### 6. Privileged Bluetooth Reflection Bonding (`scripts/bt_shizuku_bond.sh`)
+Bypasses carrier device whitelisting by dispatching Java reflection calls to `BluetoothDevice.createBond(TRANSPORT_BREDR)` via `app_process`:
+```cmd
+adb push scripts\bt_shizuku_bond.sh /data/local/tmp/
+adb shell sh /data/local/tmp/bt_shizuku_bond.sh
+```
 
 ---
 
